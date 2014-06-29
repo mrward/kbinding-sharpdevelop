@@ -1,0 +1,29 @@
+﻿<AddIn
+	name="ASP.NET vNext Binding"
+	author="Matt Ward"
+	copyright="prj:///doc/copyright.txt"
+	description="Adds support for ASP.NET vNEXT"
+	addInManagerHidden="preinstalled">
+	
+	<Manifest>
+		<Identity name="ICSharpCode.KBinding"/>
+	</Manifest>
+	
+	<Runtime>
+		<Import assembly=":ICSharpCode.SharpDevelop"/>
+		<Import assembly="KBinding.dll"/>
+	</Runtime>
+
+	<Path name="/SharpDevelop/Workbench/MainMenu/File/Open">
+		<MenuItem
+			id="File"
+			label="ASP.NET vNext Project"
+			icon="Icons.16x16.OpenProjectIcon"
+			class="ICSharpCode.KBinding.OpenKProject"/>
+		<MenuItem
+			id="File"
+			label="ASP.NET vNext Solution Directory"
+			icon="Icons.16x16.SolutionIcon"
+			class="ICSharpCode.KBinding.OpenKSolutionDirectory"/>
+	</Path>
+</AddIn>
