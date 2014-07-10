@@ -47,6 +47,16 @@ namespace ICSharpCode.KBinding
 		{
 			FileName = new FileName(fileName);
 			ParentSolution = parentSolution;
+		}
+		
+		public void LoadFiles()
+		{
+			foreach (string fileName in System.IO.Directory.GetFiles(Directory, "*.*", SearchOption.AllDirectories)) {
+				var item = new FileProjectItem(this, GetDefaultItemType(fileName)) {
+					FileName = new FileName(fileName)
+				};
+				items.Add(item);
+			}
 			
 			var projectContent = new CSharpProjectContent();
 			lock (SyncRoot) {
@@ -55,17 +65,6 @@ namespace ICSharpCode.KBinding
 			}
 		}
 		
-		public void LoadFiles()
-		{
-			foreach (string fileName in System.IO.Directory.GetFiles(Directory, "*.*", SearchOption.AllDirectories)) {
-				var item = new FileProjectItem(this, ItemType.None) {
-					FileName = new FileName(fileName)
-				};
-				items.Add(item);
-			}
-		}
-		
-		public event EventHandler<ParseInformationEventArgs> ParseInformationUpdated;
 		public event EventHandler Disposed;
 		public event EventHandler ActiveConfigurationChanged;
 		
@@ -234,7 +233,16 @@ namespace ICSharpCode.KBinding
 		
 		public ItemType GetDefaultItemType(string fileName)
 		{
-			throw new NotImplementedException();
+			if (IsCSharpFile(fileName)) {
+				return ItemType.Compile;
+			}
+			return ItemType.None;
+		}
+		
+		static bool IsCSharpFile(string fileName)
+		{
+			string extension = Path.GetExtension(fileName);
+			return String.Equals(".cs", extension, StringComparison.OrdinalIgnoreCase);
 		}
 		
 		public void Save()
@@ -343,11 +351,6 @@ namespace ICSharpCode.KBinding
 			throw new NotImplementedException();
 		}
 		
-		public void OnParseInformationUpdated(ParseInformationEventArgs args)
-		{
-			throw new NotImplementedException();
-		}
-		
 		public IEnumerable<IBuildable> GetBuildDependencies(ProjectBuildOptions buildOptions)
 		{
 			throw new NotImplementedException();
@@ -418,5 +421,15 @@ namespace ICSharpCode.KBinding
 				projectEvents.RaiseProjectItemAdded(new ProjectItemEventArgs(this, projectItem));
 			}
 		}
+		
+		public void OnParseInformationUpdated(ParseInformationEventArgs args)
+		{
+			ProjectContentContainer container = projectContentContainer;
+			if (container != null)
+				container.ParseInformationUpdated(args.OldUnresolvedFile, args.NewUnresolvedFile);
+			SD.MainThread.InvokeAsyncAndForget(delegate { ParseInformationUpdated(null, args); });
+		}
+		
+		public event EventHandler<ParseInformationEventArgs> ParseInformationUpdated = delegate {};
 	}
 }
