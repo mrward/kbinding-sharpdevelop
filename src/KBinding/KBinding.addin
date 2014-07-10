@@ -44,6 +44,16 @@
 				label="Open Solution Directory"
 				icon="Icons.16x16.SolutionIcon"
 				class="ICSharpCode.KBinding.OpenKSolutionDirectory"/>
+			<MenuItem
+				id="DebugProject"
+				label="Run"
+				icon="Icons.16x16.RunProgramIcon"
+				class="ICSharpCode.KBinding.DebugProject"/>
+			<MenuItem
+				id="RunProject"
+				label="Run Without Debugging"
+				icon="Icons.16x16.Debug.StartWithoutDebugging"
+				class="ICSharpCode.KBinding.RunProject"/>
 		</MenuItem>
 	</Path>
 </AddIn>

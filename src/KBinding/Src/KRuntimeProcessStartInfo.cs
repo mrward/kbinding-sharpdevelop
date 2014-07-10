@@ -17,56 +17,19 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
 
 namespace ICSharpCode.KBinding
 {
-	public class KRuntime
+	public static class KRuntimeProcessStartInfo
 	{
-		public KRuntime(string path)
+		public static ProcessStartInfo CreateConsoleStartInfo(string directory)
 		{
-			Path  = path;
-		}
-		
-		public string Path { get; private set; }
-		
-		public override string ToString()
-		{
-			return Path;
-		}
-		
-		public string KlrPath()
-		{
-			return System.IO.Path.Combine(Path, "bin", "klr.exe");
-		}
-		
-		public static KRuntime GetDefaultRuntime()
-		{
-			KRuntimeHome home = KRuntimeHome.Find();
-			return GetDefaultRuntime(home.GetRuntimePaths());
-		}
-		
-		public static KRuntime GetDefaultRuntime(IEnumerable<string> runtimePaths)
-		{
-			string[] directories = GetPathEnvironmentVariableDirectories();
-			string defaultRuntimePath = runtimePaths
-				.Where(path => directories.Any(directory => directory.StartsWith(path, StringComparison.OrdinalIgnoreCase)))
-				.FirstOrDefault();
-			
-			if (defaultRuntimePath != null) {
-				return new KRuntime(defaultRuntimePath);
-			}
-			return null;
-		}
-		
-		static string[] GetPathEnvironmentVariableDirectories()
-		{
-			string value = Environment.GetEnvironmentVariable("PATH");
-			if (value != null) {
-				return value.Split(';');
-			}
-			return new string[0];
+			KRuntime runtime = KRuntime.GetDefaultRuntime();
+			string arguments = String.Format(
+				@"--appbase ""{0}"" ""Microsoft.Framework.ApplicationHost"" run",
+				directory);
+			return new ProcessStartInfo(runtime.KlrPath(), arguments);
 		}
 	}
 }

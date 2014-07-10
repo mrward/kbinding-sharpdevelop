@@ -71,9 +71,15 @@ namespace ICSharpCode.KBinding
 		{
 			var solution = new KSolution(path);
 			solution.LoadProjects();
+			SolutionOpened(solution);
 			ProjectBrowserPad.Instance.ProjectBrowserControl.ViewSolution(solution);
 			
 			KServices.Host.Start(solution);
+		}
+		
+		void SolutionOpened(KSolution solution)
+		{
+			IProjectService projectService = SD.ProjectService;
 		}
 		
 		public void OpenProject(string fileName)
@@ -83,6 +89,10 @@ namespace ICSharpCode.KBinding
 			ProjectBrowserPad.Instance.ProjectBrowserControl.ViewSolution(solution);
 			
 			KServices.Host.Start(solution);
+		}
+		
+		public KProject CurrentProject {
+			get { return ProjectService.CurrentProject as KProject; }
 		}
 	}
 }

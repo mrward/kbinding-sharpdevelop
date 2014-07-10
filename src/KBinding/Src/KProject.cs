@@ -19,6 +19,7 @@
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -259,7 +260,21 @@ namespace ICSharpCode.KBinding
 		
 		public void Start(bool withDebugging)
 		{
-			throw new NotImplementedException();
+			try {
+				ProcessStartInfo processStartInfo = CreateProcessStartInfo();
+				if (withDebugging) {
+					SD.Debugger.Start(processStartInfo);
+				} else {
+					SD.Debugger.StartWithoutDebugging(processStartInfo);
+				}
+			} catch (ProjectStartException ex) {
+				MessageService.ShowError(ex.Message);
+			}
+		}
+		
+		ProcessStartInfo CreateProcessStartInfo()
+		{
+			return KRuntimeProcessStartInfo.CreateConsoleStartInfo(Directory);
 		}
 		
 		public ProjectItem CreateProjectItem(IProjectItemBackendStore item)

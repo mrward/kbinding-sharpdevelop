@@ -71,10 +71,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Src\DebugProject.cs" />
     <Compile Include="Src\FileWatcher.cs" />
     <Compile Include="Src\IncomingMessages\ChangeTargetFrameworkMessage.cs" />
     <Compile Include="Src\IncomingMessages\InitializeMessage.cs" />
     <Compile Include="Src\KDesignTimeHost.cs" />
+    <Compile Include="Src\KRuntimeProcessStartInfo.cs" />
     <Compile Include="Src\KProject.cs" />
     <Compile Include="Src\KProjectService.cs" />
     <Compile Include="Src\KRuntime.cs" />
@@ -96,6 +98,7 @@
     <Compile Include="Src\OutgoingMessages\SourcesMessage.cs" />
     <Compile Include="Src\ProcessingQueue.cs" />
     <Compile Include="Src\ProcessingQueueProvider.cs" />
+    <Compile Include="Src\RunProject.cs" />
     <Compile Include="Src\SolutionFileWatcher.cs" />
   </ItemGroup>
   <ItemGroup>
