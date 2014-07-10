@@ -71,22 +71,18 @@ namespace ICSharpCode.KBinding
 		{
 			var solution = new KSolution(path);
 			solution.LoadProjects();
-			SolutionOpened(solution);
-			ProjectBrowserPad.Instance.ProjectBrowserControl.ViewSolution(solution);
+			SD.ProjectService.OpenSolution(solution);
+			//ProjectBrowserPad.Instance.ProjectBrowserControl.ViewSolution(solution);
 			
 			KServices.Host.Start(solution);
-		}
-		
-		void SolutionOpened(KSolution solution)
-		{
-			IProjectService projectService = SD.ProjectService;
 		}
 		
 		public void OpenProject(string fileName)
 		{
 			var solution = new KSolution(Path.GetDirectoryName(fileName));
 			solution.LoadProject(fileName);
-			ProjectBrowserPad.Instance.ProjectBrowserControl.ViewSolution(solution);
+			SD.ProjectService.OpenSolution(solution);
+			//ProjectBrowserPad.Instance.ProjectBrowserControl.ViewSolution(solution);
 			
 			KServices.Host.Start(solution);
 		}

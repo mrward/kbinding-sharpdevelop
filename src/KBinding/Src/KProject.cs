@@ -255,7 +255,6 @@ namespace ICSharpCode.KBinding
 		
 		public void SavePreferences()
 		{
-			throw new NotImplementedException();
 		}
 		
 		public void Start(bool withDebugging)

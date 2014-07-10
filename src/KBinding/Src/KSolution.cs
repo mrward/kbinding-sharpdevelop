@@ -58,7 +58,7 @@ namespace ICSharpCode.KBinding
 		}
 		
 		public FileName FileName {
-			get { return null; }
+			get { return Projects.First().FileName; }
 		}
 		
 		public DirectoryName Directory { get; private set; }
@@ -89,15 +89,11 @@ namespace ICSharpCode.KBinding
 		}
 		
 		public Properties Preferences {
-			get {
-				throw new NotImplementedException();
-			}
+			get { return new Properties(); }
 		}
 		
 		public Properties SDSettings {
-			get {
-				throw new NotImplementedException();
-			}
+			get { return new Properties(); }
 		}
 		
 		public bool IsReadOnly { get; private set; }
@@ -175,12 +171,10 @@ namespace ICSharpCode.KBinding
 		
 		public void SavePreferences()
 		{
-			throw new NotImplementedException();
 		}
 		
 		public void Save()
 		{
-			throw new NotImplementedException();
 		}
 		
 		public bool IsAncestorOf(ISolutionItem item)

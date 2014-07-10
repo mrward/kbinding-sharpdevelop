@@ -44,6 +44,7 @@
       <Private>False</Private>
     </Reference>
     <Reference Include="Microsoft.Build" />
+    <Reference Include="Microsoft.CSharp" />
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
