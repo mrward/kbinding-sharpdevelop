@@ -16,14 +16,34 @@
 
 	<Path name="/SharpDevelop/Workbench/MainMenu/File/Open">
 		<MenuItem
-			id="File"
+			id="FileOpenAspNetVNextProject"
 			label="ASP.NET vNext Project"
 			icon="Icons.16x16.OpenProjectIcon"
 			class="ICSharpCode.KBinding.OpenKProject"/>
 		<MenuItem
-			id="File"
+			id="FileOpenAspNetVNextSolutionDirectory"
 			label="ASP.NET vNext Solution Directory"
 			icon="Icons.16x16.SolutionIcon"
 			class="ICSharpCode.KBinding.OpenKSolutionDirectory"/>
+	</Path>
+
+	<Path name="/SharpDevelop/Workbench/MainMenu">
+		<MenuItem
+			id="ASP.NETvNext"
+			insertafter="View"
+			insertbefore="Tools"
+			label="ASP.NET &amp;vNext"
+			type="Menu">
+			<MenuItem
+				id="FileOpenAspNetVNextProject"
+				label="Open Project"
+				icon="Icons.16x16.OpenProjectIcon"
+				class="ICSharpCode.KBinding.OpenKProject"/>
+			<MenuItem
+				id="FileOpenAspNetVNextSolutionDirectory"
+				label="Open Solution Directory"
+				icon="Icons.16x16.SolutionIcon"
+				class="ICSharpCode.KBinding.OpenKSolutionDirectory"/>
+		</MenuItem>
 	</Path>
 </AddIn>
