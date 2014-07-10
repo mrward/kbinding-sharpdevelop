@@ -39,6 +39,10 @@
       <HintPath>..\..\lib\ICSharpCode.NRefactory.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="ICSharpCode.NRefactory.CSharp">
+      <HintPath>..\..\lib\ICSharpCode.NRefactory.CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
     <Reference Include="ICSharpCode.SharpDevelop">
       <HintPath>..\..\lib\ICSharpCode.SharpDevelop.dll</HintPath>
       <Private>False</Private>
@@ -99,6 +103,7 @@
     <Compile Include="Src\OutgoingMessages\SourcesMessage.cs" />
     <Compile Include="Src\ProcessingQueue.cs" />
     <Compile Include="Src\ProcessingQueueProvider.cs" />
+    <Compile Include="Src\ProjectContentContainer.cs" />
     <Compile Include="Src\RunProject.cs" />
     <Compile Include="Src\SolutionFileWatcher.cs" />
   </ItemGroup>

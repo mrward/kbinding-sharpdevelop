@@ -25,8 +25,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
-
 using ICSharpCode.Core;
+using ICSharpCode.NRefactory.CSharp;
 using ICSharpCode.NRefactory.TypeSystem;
 using ICSharpCode.SharpDevelop;
 using ICSharpCode.SharpDevelop.Dom;
@@ -40,11 +40,19 @@ namespace ICSharpCode.KBinding
 	public class KProject : IProject
 	{
 		SimpleModelCollection<ProjectItem> items = new SimpleModelCollection<ProjectItem>();
+		ProjectContentContainer projectContentContainer;
+		IAssemblyModel assemblyModel;
 		
 		public KProject(string fileName, KSolution parentSolution)
 		{
 			FileName = new FileName(fileName);
 			ParentSolution = parentSolution;
+			
+			var projectContent = new CSharpProjectContent();
+			lock (SyncRoot) {
+				projectContentContainer = new ProjectContentContainer(this, projectContent);
+				projectContentContainer.SetCompilerSettings(new CompilerSettings());
+			}
 		}
 		
 		public void LoadFiles()
@@ -151,9 +159,7 @@ namespace ICSharpCode.KBinding
 		}
 		
 		public IProjectContent ProjectContent {
-			get {
-				throw new NotImplementedException();
-			}
+			get { return projectContentContainer.ProjectContent; }
 		}
 		
 		public ILanguageBinding LanguageBinding {
@@ -164,7 +170,11 @@ namespace ICSharpCode.KBinding
 		
 		public IAssemblyModel AssemblyModel {
 			get {
-				throw new NotImplementedException();
+				if (assemblyModel == null) {
+					assemblyModel = SD.GetRequiredService<IModelFactory>()
+						.CreateAssemblyModel(new ProjectEntityModelContext(this, ".cs"));
+				}
+				return assemblyModel;
 			}
 		}
 		
@@ -283,7 +293,7 @@ namespace ICSharpCode.KBinding
 		
 		public IEnumerable<ReferenceProjectItem> ResolveAssemblyReferences(CancellationToken cancellationToken)
 		{
-			yield break;
+			return Items.OfType<ReferenceProjectItem>();
 		}
 		
 		public void ProjectCreationComplete()
@@ -325,7 +335,7 @@ namespace ICSharpCode.KBinding
 		
 		public IAmbience GetAmbience()
 		{
-			throw new NotImplementedException();
+			return new CSharpAmbience();
 		}
 		
 		public ISymbolSearch PrepareSymbolSearch(ISymbol entity)
@@ -388,6 +398,8 @@ namespace ICSharpCode.KBinding
 		{
 			if (reference.Type == "Assembly") {
 				return new FileName(reference.Path);
+			} else if (reference.Type == "Package") {
+				return new FileName(Path.Combine(reference.Path, "lib", "contract", reference.Name + ".dll"));
 			}
 			return null;
 		}
