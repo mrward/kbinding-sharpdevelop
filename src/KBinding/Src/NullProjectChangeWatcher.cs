@@ -17,46 +17,26 @@
 // DEALINGS IN THE SOFTWARE.
 
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-
-using ICSharpCode.Core;
-using ICSharpCode.SharpDevelop.Dom;
 using ICSharpCode.SharpDevelop.Project;
-using Microsoft.Build.Evaluation;
 
 namespace ICSharpCode.KBinding
 {
-	public class KSolution : Solution
+	public class NullProjectChangeWatcher : IProjectChangeWatcher
 	{
-		public KSolution(string directory)
-			: base(new NullProjectChangeWatcher())
+		public void Enable()
 		{
-			FileName = Path.Combine(directory, "KSolution.sln");
 		}
 		
-		public void LoadProjects()
+		public void Disable()
 		{
-			foreach (string fileName in System.IO.Directory.EnumerateFiles(Directory, "project.json", SearchOption.AllDirectories)) {
-				LoadProject(fileName);
-			}
-			FileName = Path.ChangeExtension(Projects.First().FileName, ".sln");
 		}
 		
-		public void LoadProject(string fileName)
+		public void Rename(string newFileName)
 		{
-			var project = new KProject(fileName, this);
-			project.LoadFiles();
-			AddFolder(project);
 		}
 		
-		public KProject GetProject(string directory)
+		public void Dispose()
 		{
-			var projectDirectory = new FileName(directory);
-			return Projects
-				.OfType<KProject>().
-				FirstOrDefault(project => new FileName(project.Directory) == projectDirectory);
 		}
 	}
 }

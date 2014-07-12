@@ -18,6 +18,7 @@
 
 using System;
 using ICSharpCode.SharpDevelop;
+using ICSharpCode.SharpDevelop.Gui;
 using Microsoft.Framework.DesignTimeHost.Models;
 using Microsoft.Framework.DesignTimeHost.Models.OutgoingMessages;
 
@@ -67,7 +68,7 @@ namespace ICSharpCode.KBinding
 		
 		void OnReferencesMessage(KProject project, ReferencesMessage message)
 		{
-			SD.MainThread.InvokeIfRequired(() => {
+			WorkbenchSingleton.SafeThreadCall(() => {
 				project.UpdateReferences(message);
 			});
 		}

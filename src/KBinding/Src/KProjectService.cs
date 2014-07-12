@@ -20,6 +20,7 @@ using System;
 using System.IO;
 using ICSharpCode.Core;
 using ICSharpCode.SharpDevelop;
+using ICSharpCode.SharpDevelop.Gui;
 using ICSharpCode.SharpDevelop.Project;
 
 namespace ICSharpCode.KBinding
@@ -28,8 +29,8 @@ namespace ICSharpCode.KBinding
 	{
 		public KProjectService()
 		{
-			SD.ProjectService.SolutionClosed += SolutionClosed;
-			SD.Workbench.MainWindow.Closed += MainWindowClosed;
+			//ProjectService.SolutionClosed += SolutionClosed;
+			WorkbenchSingleton.MainWindow.Closed += MainWindowClosed;
 		}
 
 		void MainWindowClosed(object sender, EventArgs e)
@@ -37,7 +38,7 @@ namespace ICSharpCode.KBinding
 			KServices.Host.Stop();
 		}
 		
-		void SolutionClosed(object sender, SolutionEventArgs e)
+		void SolutionClosed(object sender, EventArgs e)
 		{
 			KServices.Host.Stop();
 		}
@@ -64,15 +65,17 @@ namespace ICSharpCode.KBinding
 		
 		bool CloseSolution()
 		{
-			return SD.ProjectService.CloseSolution(true);
+			KServices.Host.Stop();
+			return true;
+			//return SD.ProjectService.CloseSolution(true);
 		}
 		
 		void OpenDirectoryAsSolution(string path)
 		{
 			var solution = new KSolution(path);
 			solution.LoadProjects();
-			SD.ProjectService.OpenSolution(solution);
-			//ProjectBrowserPad.Instance.ProjectBrowserControl.ViewSolution(solution);
+			//SD.ProjectService.OpenSolution(solution);
+			ProjectBrowserPad.Instance.ProjectBrowserControl.ViewSolution(solution);
 			
 			KServices.Host.Start(solution);
 		}
@@ -81,8 +84,8 @@ namespace ICSharpCode.KBinding
 		{
 			var solution = new KSolution(Path.GetDirectoryName(fileName));
 			solution.LoadProject(fileName);
-			SD.ProjectService.OpenSolution(solution);
-			//ProjectBrowserPad.Instance.ProjectBrowserControl.ViewSolution(solution);
+			//SD.ProjectService.OpenSolution(solution);
+			ProjectBrowserPad.Instance.ProjectBrowserControl.ViewSolution(solution);
 			
 			KServices.Host.Start(solution);
 		}

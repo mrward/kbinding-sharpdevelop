@@ -25,28 +25,32 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Xml.Linq;
+
 using ICSharpCode.Core;
-using ICSharpCode.NRefactory.CSharp;
-using ICSharpCode.NRefactory.TypeSystem;
 using ICSharpCode.SharpDevelop;
+using ICSharpCode.SharpDevelop.Debugging;
 using ICSharpCode.SharpDevelop.Dom;
-using ICSharpCode.SharpDevelop.Parser;
+using ICSharpCode.SharpDevelop.Internal.Templates;
 using ICSharpCode.SharpDevelop.Project;
 using ICSharpCode.SharpDevelop.Refactoring;
 using Microsoft.Framework.DesignTimeHost.Models.OutgoingMessages;
 
 namespace ICSharpCode.KBinding
 {
-	public class KProject : IProject
+	public class KProject : CompilableProject
 	{
-		SimpleModelCollection<ProjectItem> items = new SimpleModelCollection<ProjectItem>();
-		ProjectContentContainer projectContentContainer;
-		IAssemblyModel assemblyModel;
-		
-		public KProject(string fileName, KSolution parentSolution)
+		public KProject(string fileName, KSolution solution)
+			: base(CreateProjectCreateInfo(fileName, solution))
 		{
-			FileName = new FileName(fileName);
-			ParentSolution = parentSolution;
+		}
+		
+		static ProjectCreateInformation CreateProjectCreateInfo(string fileName, KSolution solution)
+		{
+			return new ProjectCreateInformation {
+				Solution = solution,
+				OutputProjectFileName = fileName,
+				ProjectName = Path.GetFileName(Path.GetDirectoryName(fileName))
+			};
 		}
 		
 		public void LoadFiles()
@@ -55,183 +59,19 @@ namespace ICSharpCode.KBinding
 				var item = new FileProjectItem(this, GetDefaultItemType(fileName)) {
 					FileName = new FileName(fileName)
 				};
-				items.Add(item);
-			}
-			
-			var projectContent = new CSharpProjectContent();
-			lock (SyncRoot) {
-				projectContentContainer = new ProjectContentContainer(this, projectContent);
-				projectContentContainer.SetCompilerSettings(new CompilerSettings());
+				ProjectService.AddProjectItem(this, item);
 			}
 		}
 		
-		public event EventHandler Disposed;
-		public event EventHandler ActiveConfigurationChanged;
-		
-		public object SyncRoot {
-			get { return items; }
-		}
-		
-		public IMutableModelCollection<ProjectItem> Items {
-			get { return items; }
-		}
-		
-		public IReadOnlyCollection<ItemType> AvailableFileItemTypes {
-			get {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public IMutableModelCollection<SolutionSection> ProjectSections {
-			get {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public FileName FileName { get; set; }
-		
-		public string Name {
-			get {
-				return Path.GetFileName(FileName.GetParentDirectory());
-			}
-			set {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public DirectoryName Directory {
-			get {
-				return FileName.GetParentDirectory();
-			}
-		}
-		
-		public bool IsReadOnly { get; private set; }
-		
-		public string AssemblyName {
-			get {
-				return String.Empty;
-			}
-			set {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public string RootNamespace {
-			get {
-				return String.Empty;
-			}
-			set {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public FileName OutputAssemblyFullPath {
-			get {
-				return null;
-			}
-		}
-		
-		public string Language {
+		public override string Language {
 			get { return "C#"; }
 		}
 		
-		public string AppDesignerFolder {
-			get { return String.Empty; }
-		}
-		
-		public ConfigurationMapping ConfigurationMapping {
-			get {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public bool IsStartable {
+		public override bool IsStartable {
 			get { return false; }
 		}
 		
-		public Properties Preferences {
-			get { return new Properties(); }
-		}
-		
-		public SolutionFormatVersion MinimumSolutionVersion {
-			get { return SolutionFormatVersion.VS2012; }
-		}
-		
-		public IProjectContent ProjectContent {
-			get { return projectContentContainer.ProjectContent; }
-		}
-		
-		public ILanguageBinding LanguageBinding {
-			get {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public IAssemblyModel AssemblyModel {
-			get {
-				if (assemblyModel == null) {
-					assemblyModel = SD.GetRequiredService<IModelFactory>()
-						.CreateAssemblyModel(new ProjectEntityModelContext(this, ".cs"));
-				}
-				return assemblyModel;
-			}
-		}
-		
-		public bool IsDisposed { get; private set; }
-		
-		public ISolutionFolder ParentFolder {
-			get {
-				return ParentSolution;
-			}
-			set {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public ISolution ParentSolution { get; private set; }
-		
-		public Guid IdGuid {
-			get {
-				throw new NotImplementedException();
-			}
-			set {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public Guid TypeGuid {
-			get {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public IConfigurationOrPlatformNameCollection ConfigurationNames {
-			get {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public IConfigurationOrPlatformNameCollection PlatformNames {
-			get {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public ConfigurationAndPlatform ActiveConfiguration {
-			get {
-				throw new NotImplementedException();
-			}
-			set {
-				throw new NotImplementedException();
-			}
-		}
-		
-		public IEnumerable<ProjectItem> GetItemsOfType(ItemType type)
-		{
-			yield break;
-		}
-		
-		public ItemType GetDefaultItemType(string fileName)
+		public override ItemType GetDefaultItemType(string fileName)
 		{
 			if (IsCSharpFile(fileName)) {
 				return ItemType.Compile;
@@ -241,48 +81,21 @@ namespace ICSharpCode.KBinding
 		
 		static bool IsCSharpFile(string fileName)
 		{
+			if (fileName == null)
+				return false;
+			
 			string extension = Path.GetExtension(fileName);
 			return String.Equals(".cs", extension, StringComparison.OrdinalIgnoreCase);
 		}
 		
-		public void Save()
-		{
-			throw new NotImplementedException();
-		}
-		
-		public bool IsFileInProject(FileName fileName)
-		{
-			return FindFile(fileName) != null;
-		}
-		
-		public FileProjectItem FindFile(FileName fileName)
-		{
-			lock (SyncRoot) {
-				foreach (ProjectItem item in this.Items) {
-					var fileItem = item as FileProjectItem;
-					if (fileItem != null) {
-						if (fileItem.FileName == fileName) {
-							return fileItem;
-						}
-					}
-				}
-			}
-			
-			return null;
-		}
-		
-		public void SavePreferences()
-		{
-		}
-		
-		public void Start(bool withDebugging)
+		public override void Start(bool withDebugging)
 		{
 			try {
 				ProcessStartInfo processStartInfo = CreateProcessStartInfo();
 				if (withDebugging) {
-					SD.Debugger.Start(processStartInfo);
+					DebuggerService.CurrentDebugger.Start(processStartInfo);
 				} else {
-					SD.Debugger.StartWithoutDebugging(processStartInfo);
+					DebuggerService.CurrentDebugger.StartWithoutDebugging(processStartInfo);
 				}
 			} catch (ProjectStartException ex) {
 				MessageService.ShowError(ex.Message);
@@ -292,92 +105,6 @@ namespace ICSharpCode.KBinding
 		ProcessStartInfo CreateProcessStartInfo()
 		{
 			return KRuntimeProcessStartInfo.CreateConsoleStartInfo(Directory);
-		}
-		
-		public ProjectItem CreateProjectItem(IProjectItemBackendStore item)
-		{
-			throw new NotImplementedException();
-		}
-		
-		public IEnumerable<ReferenceProjectItem> ResolveAssemblyReferences(CancellationToken cancellationToken)
-		{
-			return Items.OfType<ReferenceProjectItem>();
-		}
-		
-		public void ProjectCreationComplete()
-		{
-		}
-		
-		public void ProjectLoaded()
-		{
-		}
-		
-		public XElement LoadProjectExtensions(string name)
-		{
-			return null;
-		}
-		
-		public void SaveProjectExtensions(string name, XElement element)
-		{
-		}
-		
-		public bool HasProjectType(Guid projectTypeGuid)
-		{
-			return false;
-		}
-		
-		public string GetDefaultNamespace(string fileName)
-		{
-			return String.Empty;
-		}
-		
-		public CodeDomProvider CreateCodeDomProvider()
-		{
-			throw new NotImplementedException();
-		}
-		
-		public void GenerateCodeFromCodeDom(System.CodeDom.CodeCompileUnit compileUnit, System.IO.TextWriter writer)
-		{
-			throw new NotImplementedException();
-		}
-		
-		public IAmbience GetAmbience()
-		{
-			return new CSharpAmbience();
-		}
-		
-		public ISymbolSearch PrepareSymbolSearch(ISymbol entity)
-		{
-			throw new NotImplementedException();
-		}
-		
-		public IEnumerable<IBuildable> GetBuildDependencies(ProjectBuildOptions buildOptions)
-		{
-			throw new NotImplementedException();
-		}
-		
-		public Task<bool> BuildAsync(ProjectBuildOptions options, IBuildFeedbackSink feedbackSink, IProgressMonitor progressMonitor)
-		{
-			throw new NotImplementedException();
-		}
-		
-		public ProjectBuildOptions CreateProjectBuildOptions(BuildOptions options, bool isRootBuildable)
-		{
-			throw new NotImplementedException();
-		}
-		
-		public void Dispose()
-		{
-		}
-		
-		public IEnumerable<ProjectItem> GetCodeItems()
-		{
-			lock (SyncRoot) {
-				return Items
-					.Where(item => item is FileProjectItem)
-					.Where(item => item.FileName.GetExtension().Equals(".cs", StringComparison.OrdinalIgnoreCase))
-					.ToList();
-			}
 		}
 		
 		public void UpdateReferences(ReferencesMessage message)
@@ -390,11 +117,9 @@ namespace ICSharpCode.KBinding
 						FileName = GetFileName(dependency.Value),
 						Include = dependency.Key
 					};
-					Items.Add(referenceItem);
-					RaiseProjectItemAdded(referenceItem);
+					ProjectService.AddProjectItem(this, referenceItem);
 				}
 			}
-			
 		}
 		
 		FileName GetFileName(ReferenceDescription reference)
@@ -410,26 +135,24 @@ namespace ICSharpCode.KBinding
 		void RemoveExistingReferences()
 		{
 			lock (SyncRoot) {
-				Items.RemoveAll(item => item is ReferenceProjectItem);
+				List<ProjectItem> items = GetItemsOfType(ItemType.Reference).ToList();
+				foreach (ProjectItem item in items) {
+					ProjectService.RemoveProjectItem(this, item);
+				}
 			}
 		}
 		
-		void RaiseProjectItemAdded(ProjectItem projectItem)
+		public override void Save(string fileName)
 		{
-			IProjectServiceRaiseEvents projectEvents = SD.GetService<IProjectServiceRaiseEvents>();
-			if (projectEvents != null) {
-				projectEvents.RaiseProjectItemAdded(new ProjectItemEventArgs(this, projectItem));
-			}
 		}
 		
-		public void OnParseInformationUpdated(ParseInformationEventArgs args)
-		{
-			ProjectContentContainer container = projectContentContainer;
-			if (container != null)
-				container.ParseInformationUpdated(args.OldUnresolvedFile, args.NewUnresolvedFile);
-			SD.MainThread.InvokeAsyncAndForget(delegate { ParseInformationUpdated(null, args); });
+		public override LanguageProperties LanguageProperties {
+			get { return LanguageProperties.CSharp; }
 		}
 		
-		public event EventHandler<ParseInformationEventArgs> ParseInformationUpdated = delegate {};
+		public IEnumerable<ProjectItem> GetCodeItems()
+		{
+			return Items.Where(item => IsCSharpFile(item.FileName));
+		}
 	}
 }
