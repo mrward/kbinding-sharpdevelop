@@ -140,9 +140,7 @@ namespace ICSharpCode.KBinding
 		}
 		
 		public ConfigurationMapping ConfigurationMapping {
-			get {
-				throw new NotImplementedException();
-			}
+			get { return new ConfigurationMapping(); }
 		}
 		
 		public bool IsStartable {

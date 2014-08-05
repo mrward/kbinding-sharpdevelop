@@ -155,14 +155,7 @@ namespace ICSharpCode.KBinding
 			}
 		}
 		
-		public ConfigurationAndPlatform ActiveConfiguration {
-			get {
-				throw new NotImplementedException();
-			}
-			set {
-				throw new NotImplementedException();
-			}
-		}
+		public ConfigurationAndPlatform ActiveConfiguration { get; set; }
 		
 		public ISolutionItem GetItemByGuid(Guid guid)
 		{
