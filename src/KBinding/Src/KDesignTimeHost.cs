@@ -57,8 +57,7 @@ namespace ICSharpCode.KBinding
 				// Errors and warnings
 				var val = message.Payload.ToObject<DiagnosticsMessage>();
 			} else if (message.MessageType == "Configurations") {
-				// Configuration and compiler options
-				var val = message.Payload.ToObject<ConfigurationsMessage>();
+				OnConfigurationsMessage(project, message.Payload.ToObject<ConfigurationsMessage>());
 			} else if (message.MessageType == "Sources") {
 				// The sources to feed to the language service
 				var val = message.Payload.ToObject<SourcesMessage>();
@@ -69,6 +68,13 @@ namespace ICSharpCode.KBinding
 		{
 			SD.MainThread.InvokeIfRequired(() => {
 				project.UpdateReferences(message);
+			});
+		}
+		
+		void OnConfigurationsMessage(KProject project, ConfigurationsMessage message)
+		{
+			SD.MainThread.InvokeIfRequired(() => {
+				project.UpdateConfigurations(message);
 			});
 		}
 		

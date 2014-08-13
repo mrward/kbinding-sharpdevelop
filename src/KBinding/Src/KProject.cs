@@ -382,17 +382,34 @@ namespace ICSharpCode.KBinding
 		{
 			RemoveExistingReferences();
 			
-			foreach (KeyValuePair<string, ReferenceDescription> dependency in message.Dependencies) {
-				if (dependency.Value.Type != "Project") {
-					var referenceItem = new ReferenceProjectItem(this) {
-						FileName = GetFileName(dependency.Value),
-						Include = dependency.Key
-					};
-					Items.Add(referenceItem);
-					RaiseProjectItemAdded(referenceItem);
-				}
-			}
+			ReferenceDescription reference = message
+				.Dependencies
+				.Where(dependency => dependency.Value.Type == "Project")
+				.Select(dependency => dependency.Value)
+				.FirstOrDefault();
 			
+			foreach (ReferenceItem referenceItem in reference.Dependencies) {
+				var projectItem = new ReferenceProjectItem(this) {
+					FileName = GetFileName(referenceItem, message),
+					Include = referenceItem.Name
+				};
+				Items.Add(projectItem);
+				RaiseProjectItemAdded(projectItem);
+			}
+		}
+		
+		FileName GetFileName(ReferenceItem referenceItem, ReferencesMessage message)
+		{
+			ReferenceDescription reference = message
+				.Dependencies
+				.Where(dependency => dependency.Key == referenceItem.Name)
+				.Select(dependency => dependency.Value)
+				.FirstOrDefault();
+			
+			if (reference != null) {
+				return GetFileName(reference);
+			}
+			return new FileName(String.Empty);
 		}
 		
 		FileName GetFileName(ReferenceDescription reference)
@@ -429,5 +446,15 @@ namespace ICSharpCode.KBinding
 		}
 		
 		public event EventHandler<ParseInformationEventArgs> ParseInformationUpdated = delegate {};
+		
+		public void UpdateConfigurations(ConfigurationsMessage message)
+		{
+			Configurations = message.Configurations;
+			ActiveKConfiguration = Configurations.FirstOrDefault();
+		}
+		
+		public IList<ConfigurationData> Configurations { get; private set; }
+		
+		public ConfigurationData ActiveKConfiguration { get; private set; }
 	}
 }
